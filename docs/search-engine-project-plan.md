@@ -13,12 +13,14 @@ This project is a simplified search engine built using a microservices architect
 | Indexer Service | Python + FastAPI | Builds and maintains the inverted index |
 | Auth Service | Node.js + NestJS | Register / Login / JWT authentication |
 | Analytics Service | Node.js + NestJS | Logs searches and click events |
+| Gateway | **Nginx** | Reverse proxy / API Gateway routing requests to all services |
 
 ## Infrastructure
 
 - PostgreSQL: primary database (users, metadata, analytics)
 - Redis: caching layer (search results, sessions)
 - Kafka: asynchronous communication between services
+- **Nginx: reverse proxy / API Gateway, and static file server for the frontend**
 - Docker: containerization and local orchestration
 
 ## Architecture (Simplified)
@@ -27,7 +29,7 @@ This project is a simplified search engine built using a microservices architect
                  Frontend
                     |
                     v
-              API Gateway
+             Nginx Gateway
                     |
        -------------+-------------
        |            |            |
@@ -56,8 +58,9 @@ The core search-engine services (Search, Crawler, Indexer) use Python + FastAPI,
 - Search, Crawler, and Indexer are the heart of the "search engine" learning goal (crawling, tokenizing, scoring, caching), so keeping them in one language (Python) keeps that core logic easy to reason about and easy to share code between (e.g. a common tokenizer module).
 - Auth and Analytics are more standard, structure-heavy CRUD/API concerns (validation, guards, modules, DTOs), which is exactly what NestJS is built for, so building them in NestJS is a good opportunity to practice a second stack without touching the search-engine core.
 - Both frameworks talk to the same PostgreSQL, Redis, and Kafka infrastructure, so this is also a good exercise in keeping a polyglot microservices setup consistent (shared `.env` conventions, shared Kafka topic contracts, consistent JWT secret across languages).
+- **The Gateway itself uses Nginx instead of a hand-written code service. Nginx is a battle-tested, lightweight reverse proxy that requires no application code to route requests, handles many concurrent connections efficiently, and is what's actually used in most real-world production setups — making it both simpler for the MVP and a more realistic learning experience than a custom FastAPI gateway.**
 
-Once the MVP is working end to end, infrastructure pieces (API Gateway, Kafka, Docker) can be added gradually rather than all at once.
+Once the MVP is working end to end, infrastructure pieces (Nginx Gateway, Kafka, Docker) can be added gradually rather than all at once.
 
 ---
 
@@ -130,8 +133,12 @@ Once the MVP is working end to end, infrastructure pieces (API Gateway, Kafka, D
        tsconfig.json
        Dockerfile
      gateway/
-       main.py
+       nginx.conf
        Dockerfile
+     frontend/
+       index.html
+       app.js
+       styles.css
      docker-compose.yml
      .env
    ```
@@ -298,7 +305,7 @@ Once the MVP is working end to end, infrastructure pieces (API Gateway, Kafka, D
    - Decodes the `user_id` and returns the payload (or the fetched user) to be attached to `request.user`.
    - Wrap it in a `JwtAuthGuard` (extending `AuthGuard('jwt')`) that throws a 401 when the token is missing, invalid, or expired.
 6. Add a protected example endpoint, e.g. `GET /auth/me`, decorated with `@UseGuards(JwtAuthGuard)`, that reads `request.user` to return the current user's profile, useful for testing the flow end to end.
-7. Decide how other services will validate tokens: either they all share the same `JWT_SECRET` and verify tokens independently (Python services can verify NestJS-issued JWTs with `python-jose`/`pyjwt` since it's a standard JWT, no NestJS-specific decoding needed), or the API Gateway validates tokens centrally and forwards a trusted user identity downstream (simpler for the MVP: shared secret, independent verification per service).
+7. Decide how other services will validate tokens: either they all share the same `JWT_SECRET` and verify tokens independently (Python services can verify NestJS-issued JWTs with `python-jose`/`pyjwt` since it's a standard JWT, no NestJS-specific decoding needed), or **Nginx validates tokens centrally via its `auth_request` directive, calling a small internal verification endpoint on the Auth Service and forwarding a trusted user identity downstream** (simpler for the MVP: shared secret, independent verification per service, is still perfectly fine to start with — see Step 9 for the Nginx-based option).
 
 ### Step 7: Build the Analytics Service (NestJS)
 
@@ -328,18 +335,68 @@ Once the MVP is working end to end, infrastructure pieces (API Gateway, Kafka, D
 8. Add basic error handling and retry logic around Kafka producers/consumers on both stacks (e.g. catch connection errors on startup, since Kafka may take a few seconds longer to become ready than the services depending on it — `kafka-python`/`aiokafka` retry loops on the Python side, `KafkaJS`'s built-in retry config or a manual `onModuleInit` retry loop on the NestJS side).
 9. Add a healthcheck or startup delay so dependent services wait for Kafka to be ready (Docker Compose `depends_on` with a healthcheck, or a simple retry loop on service startup).
 
-### Step 9: Add API Gateway
+### Step 9: Add the Nginx Gateway
 
-1. Create a new lightweight FastAPI service (or use Nginx/Traefik if you prefer a non-code approach) whose only job is routing.
-2. Define route mappings:
-   - `/search/*` to forward to the Search Service.
-   - `/auth/*` to forward to the Auth Service.
-   - `/analytics/*` to forward to the Analytics Service.
-   - `/crawl/*` and `/index/*` to forward to the Crawler and Indexer Services respectively (optional, mainly useful for admin/debug access).
-3. If using FastAPI as the gateway, use `httpx` to proxy incoming requests to the correct downstream service and stream the response back.
-4. Optionally centralize JWT validation at the gateway level: verify the token once here, then forward the decoded `user_id` to downstream services via a custom header (e.g. `X-User-Id`), so individual services do not need to re-verify JWTs.
-5. Add basic request logging at the gateway level (method, path, response time, status code) since this is the single entry point and a natural place for centralized observability.
-6. Add CORS configuration at the gateway level so the frontend (running on a different port/origin) can call it without browser errors.
+1. Create a `gateway/` folder containing an `nginx.conf` file whose only job is routing incoming requests to the correct downstream service. Using Nginx instead of a hand-written proxy service keeps the gateway lightweight, fast, and free of application code to maintain.
+2. Define upstream blocks and route mappings in `nginx.conf`:
+   ```nginx
+   events {}
+
+   http {
+       upstream search_service {
+           server search-service:8000;
+       }
+       upstream auth_service {
+           server auth-service:8000;
+       }
+       upstream analytics_service {
+           server analytics-service:8000;
+       }
+       upstream crawler_service {
+           server crawler-service:8000;
+       }
+       upstream indexer_service {
+           server indexer-service:8000;
+       }
+
+       server {
+           listen 80;
+
+           location /search/ {
+               proxy_pass http://search_service/;
+               proxy_set_header Host $host;
+               proxy_set_header X-Real-IP $remote_addr;
+           }
+
+           location /auth/ {
+               proxy_pass http://auth_service/;
+               proxy_set_header Host $host;
+           }
+
+           location /analytics/ {
+               proxy_pass http://analytics_service/;
+               proxy_set_header Host $host;
+           }
+
+           location /crawl/ {
+               proxy_pass http://crawler_service/;
+           }
+
+           location /index/ {
+               proxy_pass http://indexer_service/;
+           }
+       }
+   }
+   ```
+3. Write a minimal `gateway/Dockerfile`:
+   ```dockerfile
+   FROM nginx:1.27-alpine
+   COPY nginx.conf /etc/nginx/nginx.conf
+   ```
+4. (Optional, more advanced) Centralize JWT validation at the gateway level using Nginx's `auth_request` directive: point it at a small internal verification endpoint on the Auth Service (e.g. `GET /auth/verify`), and on success forward the decoded `user_id` to downstream services via a custom header (e.g. `X-User-Id`) using `auth_request_set` — so individual services do not need to re-verify JWTs themselves. If this feels like too much for the MVP, stick with each service verifying the shared `JWT_SECRET` independently (as set up in Step 6) and revisit this later.
+5. Add basic access logging in `nginx.conf` (Nginx's default `access_log`/`error_log` directives already capture method, path, status code, and response time) since the gateway is the single entry point and a natural place for centralized observability.
+6. Add CORS headers at the gateway level (via `add_header` directives, or the `nginx-cors` approach of handling `OPTIONS` preflight requests explicitly) so the frontend (running on a different port/origin) can call it without browser errors.
+7. Confirm routing works by starting the gateway alongside the other services and hitting each `location` block manually (e.g. `curl http://localhost:8000/search/?q=test`) to verify traffic reaches the right downstream service.
 
 ### Step 10: Containerize Everything with Docker
 
@@ -369,18 +426,19 @@ Once the MVP is working end to end, infrastructure pieces (API Gateway, Kafka, D
      COPY --from=build /app/dist ./dist
      CMD ["node", "dist/main.js"]
      ```
+   - Gateway (Nginx): as defined in Step 9 (`FROM nginx:1.27-alpine`, copying in `nginx.conf`).
 2. Write the root `docker-compose.yml` including:
    - `postgres` (with a named volume for data persistence)
    - `redis`
    - `kafka` (and `zookeeper` if required by the chosen image)
    - `search-service`, `crawler-service`, `indexer-service`, `auth-service`, `analytics-service`
-   - `gateway`
-3. Configure each service's environment variables in `docker-compose.yml` to reference container service names instead of `localhost` (e.g. `DATABASE_URL=postgresql://user:password@postgres:5432/search_engine`, `KAFKA_BROKER=kafka:9092`).
-4. Add `depends_on` relationships so PostgreSQL, Redis, and Kafka start before the services that need them (note that `depends_on` alone does not guarantee readiness, only startup order, so retry logic in the app code is still important).
-5. Expose only the gateway's port to the host machine (e.g. `8000:8000`) and keep other services internal to the Docker network, since external clients should only talk to the gateway.
+   - `gateway` (Nginx)
+3. Configure each service's environment variables in `docker-compose.yml` to reference container service names instead of `localhost` (e.g. `DATABASE_URL=postgresql://user:password@postgres:5432/search_engine`, `KAFKA_BROKER=kafka:9092`). The Nginx gateway's `upstream` blocks likewise reference the other services by their Docker Compose service names (e.g. `search-service`, `auth-service`), which Docker's internal DNS resolves automatically.
+4. Add `depends_on` relationships so PostgreSQL, Redis, and Kafka start before the services that need them (note that `depends_on` alone does not guarantee readiness, only startup order, so retry logic in the app code is still important). Add the gateway's `depends_on` for all downstream services so Nginx doesn't fail its first proxy attempts before they're up.
+5. Expose only the gateway's port to the host machine (e.g. `8000:80`, matching the `listen 80` in `nginx.conf`) and keep other services internal to the Docker network, since external clients should only talk to the gateway.
 6. Run `docker compose up --build` and confirm all containers start without errors.
 7. Run the Alembic migrations inside the appropriate container (or as a one-off `docker compose run` command) to create the database schema inside the containerized PostgreSQL instance.
-8. Verify inter-service communication works from inside the Docker network (e.g. exec into a container and `curl` another service by its service name).
+8. Verify inter-service communication works from inside the Docker network (e.g. exec into a container and `curl` another service by its service name), and verify external routing works by hitting the exposed gateway port from the host (e.g. `curl http://localhost:8000/search/?q=test`).
 
 ### Step 11: Testing and Refinement
 
@@ -391,16 +449,17 @@ Once the MVP is working end to end, infrastructure pieces (API Gateway, Kafka, D
 2. Write integration tests for endpoints:
    - Python services: use `pytest` and `httpx.AsyncClient` (or FastAPI's `TestClient`), ideally against a test database (a separate PostgreSQL database or schema, not production data).
    - NestJS services: use Nest's `@nestjs/testing` module (`Test.createTestingModule`) together with Jest and `supertest` for HTTP-level assertions, against the same kind of isolated test database.
+   - Gateway: test the Nginx routing rules by sending requests through the gateway's exposed port and confirming they reach the correct downstream service (e.g. via `curl` or a small script hitting each `location` path).
 3. Run a full manual end-to-end test:
-   - Trigger the Crawler Service to crawl a few pages.
+   - Trigger the Crawler Service (through the gateway) to crawl a few pages.
    - Confirm rows appear in `pages`.
    - Confirm the Indexer Service consumes the events and populates `inverted_index`.
-   - Run a search query through the Search Service and confirm relevant results are returned.
+   - Run a search query through the gateway and confirm relevant results are returned.
    - Confirm a `search_performed` event reaches the Analytics Service and a row appears in `search_logs`.
 4. Verify Redis caching is actually working: run the same search twice and confirm the second call is faster (or log a "cache hit"/"cache miss" message to confirm behavior directly).
 5. Review Kafka consumer group behavior: restart the Indexer Service mid-crawl and confirm it resumes from the correct offset instead of reprocessing everything or skipping messages.
-6. Load-test the Search Service lightly (e.g. using `locust` or a simple script firing repeated requests) to see how it behaves under concurrent load, even at a small scale.
-7. Review logs across all services for unhandled exceptions or silent failures, and add missing error handling where needed.
+6. Load-test the Search Service (through the gateway) lightly (e.g. using `locust` or a simple script firing repeated requests) to see how it behaves under concurrent load, even at a small scale — this also indirectly tests how Nginx handles concurrent proxied connections.
+7. Review logs across all services, including Nginx's `access_log`/`error_log`, for unhandled exceptions, proxy errors (e.g. `502 Bad Gateway` if a downstream service is unreachable), or silent failures, and add missing error handling where needed.
 
 ### Step 12: Optional Enhancements (After MVP)
 
@@ -410,12 +469,31 @@ Once the MVP is working end to end, infrastructure pieces (API Gateway, Kafka, D
 2. Add pagination metadata to the search response (`total_pages`, `has_next`, `has_previous`).
 3. Add a simple frontend:
    - A single HTML page with a search box, results list, and login/register forms.
-   - Use plain JavaScript with `fetch()` calls to the Gateway, or a lightweight framework if preferred.
-4. Add health check endpoints (`/health`) to every service and wire them into Docker Compose healthchecks so failures are detected automatically.
-5. Add centralized logging (e.g. forward logs to a single place using `docker compose logs` initially, or a proper log aggregator later like Loki/ELK for a more advanced setup).
-6. Add rate limiting on the Search Service and Gateway to prevent abuse (e.g. a simple Redis-based sliding window counter per IP or per user).
+   - Use plain JavaScript with `fetch()` calls to the Nginx gateway, or a lightweight framework if preferred.
+   - **Serve the static frontend files directly from Nginx** rather than from an application service: add a `frontend` container (or a second `location` block in the existing gateway) using the stock `nginx:1.27-alpine` image with the frontend's `index.html`/`app.js`/`styles.css` mounted or copied in, e.g.:
+     ```yaml
+     frontend:
+       image: nginx:1.27-alpine
+       volumes:
+         - ./frontend:/usr/share/nginx/html:ro
+       ports:
+         - "3000:80"
+     ```
+     This keeps static asset serving fast and separate from API routing, without needing any application code just to serve HTML/JS/CSS.
+4. Add health check endpoints (`/health`) to every service and wire them into Docker Compose healthchecks so failures are detected automatically. Add an Nginx healthcheck too (e.g. `curl -f http://localhost/health` against a trivial `location /health { return 200; }` block) so Compose can detect if the gateway itself goes down.
+5. Add centralized logging (e.g. forward logs to a single place using `docker compose logs` initially, or a proper log aggregator later like Loki/ELK for a more advanced setup) — Nginx's `access_log` format can be customized to emit structured JSON logs to make this easier downstream.
+6. Add rate limiting on the Search Service and Gateway to prevent abuse. At the gateway level, this is a natural fit for **Nginx's built-in `limit_req_zone`/`limit_req` directives** (a simple sliding-window-style limiter per IP), used instead of or alongside a Redis-based counter in the Search Service itself:
+   ```nginx
+   limit_req_zone $binary_remote_addr zone=search_limit:10m rate=10r/s;
+
+   location /search/ {
+       limit_req zone=search_limit burst=20 nodelay;
+       proxy_pass http://search_service/;
+   }
+   ```
 7. Add incremental re-crawling: track `crawled_at` timestamps and periodically re-crawl pages older than a set threshold to keep the index fresh.
-8. Add basic monitoring (e.g. Prometheus + Grafana) to track request counts, latency, and error rates per service, once the core system is stable.
+8. Add basic monitoring (e.g. Prometheus + Grafana) to track request counts, latency, and error rates per service, once the core system is stable. Nginx exposes basic metrics via its `stub_status` module, which can be scraped by an `nginx-prometheus-exporter` sidecar to fold gateway-level metrics into the same dashboard.
+9. Add TLS termination at the gateway: since Nginx already sits at the edge, adding an SSL certificate (e.g. via Let's Encrypt/Certbot) and a `listen 443 ssl;` block here is a natural next step once the project is exposed beyond localhost.
 
 ---
 
@@ -429,7 +507,7 @@ Once the MVP is working end to end, infrastructure pieces (API Gateway, Kafka, D
 6. Auth Service (independent, can be built in parallel)
 7. Analytics Service (independent, can be built in parallel)
 8. Connect everything through Kafka
-9. Add API Gateway
+9. Add the Nginx Gateway
 10. Dockerize and run the full stack together
 11. Test end to end
-12. Add optional enhancements
+12. Add optional enhancements (including serving the frontend via Nginx, and gateway-level rate limiting/TLS)
