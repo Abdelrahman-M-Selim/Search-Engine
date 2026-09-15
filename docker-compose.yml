@@ -1,0 +1,182 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # Infrastructure
+  # ==========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: search_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-search_engine}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - search_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-search_engine}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: search_redis
+    volumes:
+      - redis_data:/data
+    networks:
+      - search_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: search_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - search_network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: search_kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - search_network
+
+  # ==========================================
+  # Microservices
+  # ==========================================
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: search_gateway
+    ports:
+      - "8000:80"
+    depends_on:
+      - search-service
+      - auth-service
+      - analytics-service
+      - crawler-service
+      - indexer-service
+    networks:
+      - search_network
+    restart: unless-stopped
+
+  search-service:
+    build:
+      context: ./search-service
+      dockerfile: Dockerfile
+    container_name: search_service
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://user:password@postgres:5432/search_engine}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - KAFKA_BROKER=${KAFKA_BROKER:-kafka:9092}
+      - SEARCH_PERFORMED_TOPIC=${SEARCH_PERFORMED_TOPIC:-search_performed}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - search_network
+    restart: unless-stopped
+
+  indexer-service:
+    build:
+      context: ./indexer-service
+      dockerfile: Dockerfile
+    container_name: search_indexer_service
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://user:password@postgres:5432/search_engine}
+      - KAFKA_BROKER=${KAFKA_BROKER:-kafka:9092}
+      - PAGE_CRAWLED_TOPIC=${PAGE_CRAWLED_TOPIC:-page_crawled}
+      - KAFKA_GROUP_ID=${KAFKA_GROUP_ID:-indexer-group}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - search_network
+    restart: unless-stopped
+
+  crawler-service:
+    build:
+      context: ./crawler-service
+      dockerfile: Dockerfile
+    container_name: search_crawler_service
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://user:password@postgres:5432/search_engine}
+      - KAFKA_BROKER=${KAFKA_BROKER:-kafka:9092}
+      - PAGE_CRAWLED_TOPIC=${PAGE_CRAWLED_TOPIC:-page_crawled}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - search_network
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: search_auth_service
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://user:password@postgres:5432/search_engine}
+      - JWT_SECRET=${JWT_SECRET:-change_this_secret}
+      - JWT_EXPIRE_MINUTES=${JWT_EXPIRE_MINUTES:-60}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - search_network
+    restart: unless-stopped
+
+  analytics-service:
+    build:
+      context: ./analytics-service
+      dockerfile: Dockerfile
+    container_name: search_analytics_service
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://user:password@postgres:5432/search_engine}
+      - KAFKA_BROKER=${KAFKA_BROKER:-kafka:9092}
+      - SEARCH_PERFORMED_TOPIC=${SEARCH_PERFORMED_TOPIC:-search_performed}
+      - RESULT_CLICKED_TOPIC=${RESULT_CLICKED_TOPIC:-result_clicked}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - search_network
+    restart: unless-stopped
+
+# ==========================================
+# Networks & Volumes
+# ==========================================
+networks:
+  search_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
