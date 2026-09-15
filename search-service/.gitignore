@@ -1,28 +1,32 @@
-# Python artifacts
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
 
-# Virtual environments
-.venv/
+# Virtual Environments
 venv/
+.venv/
 ENV/
 env/
 
-# Environment variables
+# Environment & Secrets
 .env
+.env.local
 !.env.example
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Unit test / coverage
+.pytest_cache/
+.coverage
 
 # IDEs
 .vscode/
 .idea/
-
-# Testing & Coverage
-.pytest_cache/
-.coverage
-htmlcov/
 
 # Logs
 *.log
