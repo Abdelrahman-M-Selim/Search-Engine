@@ -25,4 +25,4 @@ jobs:
         run: docker build -t search-engine-gateway:latest ./gateway
 
       - name: Verify Docker Compose
-        run: docker-compose config
+        run: docker compose config
