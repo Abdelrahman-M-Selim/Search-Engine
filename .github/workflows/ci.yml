@@ -1,0 +1,28 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build Auth Service
+        run: docker build -t search-engine-auth:latest ./auth-service
+
+      - name: Build Analytics Service
+        run: docker build -t search-engine-analytics:latest ./analytics-service
+
+      - name: Build Crawler Service
+        run: docker build -t search-engine-crawler:latest ./crawler-service
+
+      - name: Build Gateway
+        run: docker build -t search-engine-gateway:latest ./gateway
+
+      - name: Verify Docker Compose
+        run: docker-compose config
