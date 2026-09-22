@@ -6,10 +6,19 @@ from app.config import settings
 from app.database import db
 from app.kafka_producer import kafka_client
 
+import time
+
 class CrawlerEngine:
     def __init__(self):
         self.running = False
         self.client = None
+        self.domain_locks = {}
+        self.domain_last_crawl = {}
+
+    async def _get_domain_lock(self, domain: str):
+        if domain not in self.domain_locks:
+            self.domain_locks[domain] = asyncio.Lock()
+        return self.domain_locks[domain]
 
     async def start(self):
         self.running = True
@@ -32,6 +41,16 @@ class CrawlerEngine:
             await asyncio.gather(*tasks)
 
     async def _crawl_url(self, url: str, depth: int):
+        base_domain = urlparse(url).netloc
+        lock = await self._get_domain_lock(base_domain)
+        
+        async with lock:
+            last_crawl = self.domain_last_crawl.get(base_domain, 0)
+            now = time.time()
+            if now - last_crawl < 1.0:
+                await asyncio.sleep(1.0 - (now - last_crawl))
+            self.domain_last_crawl[base_domain] = time.time()
+
         try:
             response = await self.client.get(url)
             if response.status_code != 200:
@@ -48,11 +67,11 @@ class CrawlerEngine:
             
             text_content = soup.get_text(separator=' ', strip=True)
             
-            await kafka_client.send_crawled_page(url, title, text_content)
+            page_id = await db.save_page(url, title, text_content)
+            await kafka_client.send_crawled_page(page_id, url)
             
             if depth < settings.max_depth:
                 new_urls = set()
-                base_domain = urlparse(url).netloc
                 for link in soup.find_all('a', href=True):
                     href = link['href']
                     full_url = urljoin(url, href)

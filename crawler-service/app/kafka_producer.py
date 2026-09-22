@@ -17,11 +17,10 @@ class KafkaProducerClient:
         if self.producer:
             await self.producer.stop()
 
-    async def send_crawled_page(self, url: str, title: str, content: str):
+    async def send_crawled_page(self, page_id: int, url: str):
         payload = {
-            "url": url,
-            "title": title,
-            "content": content
+            "page_id": page_id,
+            "url": url
         }
         await self.producer.send_and_wait(settings.page_crawled_topic, payload)
 
