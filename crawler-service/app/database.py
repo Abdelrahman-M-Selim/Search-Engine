@@ -18,6 +18,13 @@ class Database:
                     depth INTEGER NOT NULL,
                     status VARCHAR(20) DEFAULT 'PENDING'
                 );
+                CREATE TABLE IF NOT EXISTS pages (
+                    id SERIAL PRIMARY KEY,
+                    url TEXT UNIQUE NOT NULL,
+                    title TEXT,
+                    content TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
             """)
 
     async def disconnect(self):
@@ -61,5 +68,17 @@ class Database:
                 VALUES ($1, $2, 'PENDING')
                 ON CONFLICT (url) DO NOTHING
             """, urls)
+
+    async def save_page(self, url: str, title: str, content: str) -> int:
+        async with self.pool.acquire() as conn:
+            return await conn.fetchval("""
+                INSERT INTO pages (url, title, content)
+                VALUES ($1, $2, $3)
+                ON CONFLICT (url) DO UPDATE SET
+                    title = EXCLUDED.title,
+                    content = EXCLUDED.content,
+                    created_at = CURRENT_TIMESTAMP
+                RETURNING id
+            """, url, title, content)
 
 db = Database()
