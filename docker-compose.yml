@@ -1,9 +1,7 @@
 version: '3.8'
 
 services:
-  # ==========================================
   # Infrastructure
-  # ==========================================
   postgres:
     image: postgres:16-alpine
     container_name: search_postgres
@@ -11,6 +9,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: ${POSTGRES_DB:-search_engine}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -24,6 +24,8 @@ services:
   redis:
     image: redis:7-alpine
     container_name: search_redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -33,6 +35,37 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  # Database & Cache Web Management UIs
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: search_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@search.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - search_network
+    restart: unless-stopped
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: search_redis_commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "${REDIS_COMMANDER_PORT:-8081}:8081"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - search_network
+    restart: unless-stopped
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
@@ -57,9 +90,7 @@ services:
     networks:
       - search_network
 
-  # ==========================================
   # Microservices
-  # ==========================================
   gateway:
     build:
       context: ./gateway
@@ -170,9 +201,7 @@ services:
       - search_network
     restart: unless-stopped
 
-# ==========================================
 # Networks & Volumes
-# ==========================================
 networks:
   search_network:
     driver: bridge
