@@ -24,10 +24,6 @@ onMounted(() => {
 
 <template>
   <div class="app-layout">
-    <!-- Background subtle gradient glows -->
-    <div class="ambient-glow top-left"></div>
-    <div class="ambient-glow bottom-right"></div>
-
     <!-- Top Navigation Header -->
     <AppHeader v-model:active-tab="activeTab" />
 
@@ -59,30 +55,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow-x: hidden;
-}
-
-.ambient-glow {
-  position: fixed;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-  filter: blur(120px);
-  opacity: 0.12;
-}
-
-.ambient-glow.top-left {
-  top: -200px;
-  left: -200px;
-  background: radial-gradient(circle, #6366f1 0%, rgba(99, 102, 241, 0) 70%);
-}
-
-.ambient-glow.bottom-right {
-  bottom: -200px;
-  right: -200px;
-  background: radial-gradient(circle, #06b6d4 0%, rgba(6, 182, 212, 0) 70%);
+  background-color: var(--bg-app);
 }
 
 .app-main {

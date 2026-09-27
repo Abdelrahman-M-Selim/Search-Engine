@@ -2,7 +2,7 @@ import { ref, watchEffect } from 'vue'
 
 export type Theme = 'dark' | 'light'
 
-const currentTheme = ref<Theme>((localStorage.getItem('se_theme') as Theme) || 'dark')
+const currentTheme = ref<Theme>((localStorage.getItem('se_theme') as Theme) || 'light')
 
 export function useTheme() {
   function toggleTheme() {

@@ -75,11 +75,11 @@ const trendingSearches = [
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-primary, #ffffff);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 .section-title.space-between {
@@ -87,11 +87,11 @@ const trendingSearches = [
 }
 
 .muted-title {
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 .spark-icon {
-  color: #818cf8;
+  color: var(--accent-primary);
   width: 14px;
   height: 14px;
 }
@@ -100,7 +100,7 @@ const trendingSearches = [
   background: none;
   border: none;
   font-size: 0.75rem;
-  color: var(--text-muted, #64748b);
+  color: var(--text-muted);
   cursor: pointer;
   padding: 0;
 }
@@ -113,30 +113,29 @@ const trendingSearches = [
 .tags-cloud {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
 .query-chip {
-  background: var(--bg-surface, #1e293b);
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
-  color: var(--text-secondary, #cbd5e1);
-  padding: 0.35rem 0.85rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.3rem 0.75rem;
   border-radius: 20px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .query-chip:hover {
-  background: rgba(99, 102, 241, 0.15);
-  border-color: rgba(99, 102, 241, 0.4);
-  color: #ffffff;
-  transform: translateY(-1px);
+  background: var(--bg-surface-soft);
+  border-color: var(--border-color-hover);
+  color: var(--text-primary);
 }
 
 .trending-chip {
-  background: rgba(99, 102, 241, 0.08);
-  border-color: rgba(99, 102, 241, 0.2);
+  background: var(--bg-surface);
 }
 </style>

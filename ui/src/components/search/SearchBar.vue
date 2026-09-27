@@ -158,43 +158,43 @@ onUnmounted(() => {
 .search-bar-container {
   position: relative;
   width: 100%;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .search-input-box {
   display: flex;
   align-items: center;
-  background: var(--bg-surface, #1e293b);
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15));
-  border-radius: 16px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  transition: all 0.25s ease;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
   position: relative;
   z-index: 10;
 }
 
 .mode-hero .search-input-box {
-  height: 62px;
-  padding: 0 0.75rem 0 1.25rem;
-  border-radius: 20px;
+  height: 56px;
+  padding: 0 0.5rem 0 1rem;
+  border-radius: 14px;
 }
 
 .mode-compact .search-input-box {
-  height: 48px;
-  padding: 0 0.5rem 0 1rem;
-  border-radius: 12px;
+  height: 44px;
+  padding: 0 0.4rem 0 0.85rem;
+  border-radius: 10px;
 }
 
 .search-bar-container.focused .search-input-box {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2), 0 15px 30px -5px rgba(0, 0, 0, 0.4);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12), var(--shadow-md);
 }
 
 .search-icon-wrapper {
   display: flex;
   align-items: center;
-  color: var(--text-muted, #94a3b8);
-  margin-right: 0.75rem;
+  color: var(--text-muted);
+  margin-right: 0.65rem;
 }
 
 .search-input {
@@ -202,67 +202,74 @@ onUnmounted(() => {
   background: transparent;
   border: none;
   outline: none;
-  font-size: 1.05rem;
-  color: var(--text-primary, #ffffff);
+  font-size: 0.98rem;
+  color: var(--text-primary);
   font-family: inherit;
 }
 
 .mode-compact .search-input {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .search-input::placeholder {
-  color: var(--text-muted, #64748b);
-  font-size: 0.92rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 .search-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .clear-btn {
   background: none;
   border: none;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
   cursor: pointer;
-  padding: 0.35rem 0.5rem;
+  padding: 0.3rem 0.45rem;
   border-radius: 6px;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  transition: all 0.15s ease;
 }
 
 .clear-btn:hover {
-  color: var(--text-primary, #ffffff);
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  background: var(--bg-surface-soft);
 }
 
 .submit-search-btn {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: #0f172a;
   color: #ffffff;
   border: none;
   font-weight: 600;
-  font-size: 0.88rem;
-  padding: 0.55rem 1.15rem;
-  border-radius: 12px;
+  font-size: 0.84rem;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  transition: all 0.15s ease;
+}
+
+.dark-theme .submit-search-btn {
+  background: #2563eb;
 }
 
 .mode-compact .submit-search-btn {
-  padding: 0.4rem 0.85rem;
-  font-size: 0.82rem;
-  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: 7px;
 }
 
 .submit-search-btn:hover {
-  opacity: 0.92;
-  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.sparkle-icon {
+  width: 14px;
+  height: 14px;
 }
 
 /* Suggestions Dropdown */
@@ -271,35 +278,35 @@ onUnmounted(() => {
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  background: var(--bg-surface, #1e293b);
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
-  border-radius: 16px;
-  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   z-index: 50;
-  padding: 0.4rem 0;
+  padding: 0.35rem 0;
 }
 
 .suggestion-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.65rem 1.25rem;
-  color: var(--text-primary, #e2e8f0);
+  gap: 0.65rem;
+  padding: 0.55rem 1rem;
+  color: var(--text-secondary);
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.15s ease;
+  font-size: 0.88rem;
+  transition: all 0.1s ease;
 }
 
 .suggestion-item:hover,
 .suggestion-item.active {
-  background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
+  background: var(--bg-surface-soft);
+  color: var(--text-primary);
 }
 
 .suggestion-icon {
   width: 14px;
   height: 14px;
-  opacity: 0.6;
+  color: var(--text-muted);
 }
 </style>

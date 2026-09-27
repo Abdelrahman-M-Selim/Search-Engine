@@ -75,20 +75,20 @@ function handleClick() {
 .search-result-card {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  background: var(--bg-card, rgba(30, 41, 59, 0.5));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-  border-radius: 16px;
-  padding: 1.25rem 1.5rem;
-  transition: all 0.2s ease;
+  gap: 0.4rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.15rem 1.35rem;
+  transition: all 0.15s ease;
   position: relative;
+  box-shadow: var(--shadow-sm);
 }
 
 .search-result-card:hover {
-  border-color: rgba(99, 102, 241, 0.35);
-  background: var(--bg-card-hover, rgba(30, 41, 59, 0.8));
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+  border-color: var(--border-color-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .result-header {
@@ -101,27 +101,28 @@ function handleClick() {
 .domain-badge {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   overflow: hidden;
 }
 
 .domain-avatar {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  background: rgba(99, 102, 241, 0.2);
-  color: #818cf8;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: var(--bg-surface-soft);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
   flex-shrink: 0;
 }
 
 .domain-url {
-  font-size: 0.78rem;
-  color: var(--text-muted, #94a3b8);
+  font-size: 0.76rem;
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -130,13 +131,13 @@ function handleClick() {
 
 .result-title {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 .result-title a {
-  color: var(--link-color, #60a5fa);
+  color: var(--link-color);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -145,13 +146,15 @@ function handleClick() {
 }
 
 .result-title a:hover {
-  color: #93c5fd;
+  color: var(--link-color-hover);
   text-decoration: underline;
 }
 
 .external-icon {
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
+  width: 12px;
+  height: 12px;
 }
 
 .search-result-card:hover .external-icon {
@@ -159,9 +162,9 @@ function handleClick() {
 }
 
 .result-snippet {
-  font-size: 0.9rem;
-  line-height: 1.55;
-  color: var(--text-secondary, #cbd5e1);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -169,28 +172,28 @@ function handleClick() {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.4rem;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.05));
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color);
 }
 
 .tf-label {
-  font-size: 0.72rem;
-  color: var(--text-muted, #64748b);
+  font-size: 0.7rem;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
 .tf-chip {
-  font-size: 0.72rem;
-  padding: 0.12rem 0.5rem;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #94a3b8;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.7rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  background: var(--bg-surface-soft);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
 }
 
 .tf-chip strong {
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 </style>

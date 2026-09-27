@@ -152,19 +152,19 @@ function onChangeSort(sortBy: 'relevance' | 'date') {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.35rem 0.85rem;
+  padding: 0.3rem 0.75rem;
   border-radius: 9999px;
-  background: rgba(99, 102, 241, 0.12);
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  color: #818cf8;
+  background: var(--bg-surface-soft);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 500;
 }
 
 .hero-sparkle {
   width: 14px;
   height: 14px;
+  color: var(--accent-primary);
 }
 
 .hero-title {
@@ -172,15 +172,13 @@ function onChangeSort(sortBy: 'relevance' | 'date') {
   font-weight: 800;
   line-height: 1.15;
   letter-spacing: -0.03em;
-  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .hero-subtitle {
   font-size: 1.05rem;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
   max-width: 580px;
   line-height: 1.6;
   margin: 0;
@@ -210,46 +208,47 @@ function onChangeSort(sortBy: 'relevance' | 'date') {
 .results-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
 .empty-results-card {
-  background: var(--bg-surface, #1e293b);
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-  border-radius: 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
   padding: 3rem 2rem;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .empty-icon {
-  font-size: 2.5rem;
+  font-size: 2rem;
 }
 
 .empty-title {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  color: var(--text-primary, #ffffff);
+  color: var(--text-primary);
   margin: 0;
 }
 
 .empty-text {
-  font-size: 0.92rem;
-  color: var(--text-muted, #94a3b8);
+  font-size: 0.9rem;
+  color: var(--text-muted);
   margin: 0;
 }
 
 .empty-suggestions {
   margin-top: 1rem;
   text-align: left;
-  background: var(--bg-card-soft, rgba(255, 255, 255, 0.03));
-  border-radius: 12px;
+  background: var(--bg-surface-soft);
+  border-radius: 8px;
   padding: 1rem 1.5rem;
   font-size: 0.85rem;
-  color: var(--text-secondary, #cbd5e1);
+  color: var(--text-secondary);
 }
 
 .empty-suggestions ul {

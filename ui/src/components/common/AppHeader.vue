@@ -159,21 +159,21 @@ function selectTab(tab: 'search' | 'crawler' | 'indexer' | 'analytics' | 'system
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: var(--nav-bg, rgba(15, 23, 42, 0.85));
+  background: var(--nav-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-bottom: 1px solid var(--border-color);
   padding: 0 1.5rem;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .header-inner {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 68px;
+  height: 64px;
   gap: 1.5rem;
 }
 
@@ -181,27 +181,31 @@ function selectTab(tab: 'search' | 'crawler' | 'indexer' | 'analytics' | 'system
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
   cursor: pointer;
   user-select: none;
 }
 
 .brand-badge {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #06b6d4 100%);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+  box-shadow: var(--shadow-sm);
+}
+
+.dark-theme .brand-badge {
+  background: #3b82f6;
 }
 
 .brand-spark {
   color: #ffffff;
-  font-weight: 800;
-  font-size: 0.95rem;
-  letter-spacing: -0.05em;
+  font-weight: 700;
+  font-size: 0.85rem;
 }
 
 .brand-text {
@@ -210,20 +214,17 @@ function selectTab(tab: 'search' | 'crawler' | 'indexer' | 'analytics' | 'system
 }
 
 .brand-title {
-  font-weight: 800;
-  font-size: 1.15rem;
-  color: var(--text-primary, #ffffff);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary);
   line-height: 1.1;
-  background: linear-gradient(90deg, #ffffff 0%, #cbd5e1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .brand-subtitle {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
-  color: #818cf8;
-  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
@@ -231,39 +232,44 @@ function selectTab(tab: 'search' | 'crawler' | 'indexer' | 'analytics' | 'system
 .nav-tabs {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  background: var(--bg-card-soft, rgba(255, 255, 255, 0.04));
-  padding: 0.3rem 0.4rem;
-  border-radius: 12px;
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  gap: 0.25rem;
+  background: var(--bg-surface-soft);
+  padding: 0.25rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
 }
 
 .nav-tab {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.45rem 0.95rem;
-  font-size: 0.86rem;
-  font-weight: 600;
-  color: var(--text-muted, #94a3b8);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text-muted);
   background: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: 7px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   position: relative;
 }
 
 .nav-tab:hover {
-  color: var(--text-primary, #ffffff);
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.dark-theme .nav-tab:hover {
   background: rgba(255, 255, 255, 0.05);
 }
 
 .nav-tab.active {
-  color: #ffffff;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(59, 130, 246, 0.25) 100%);
-  border: 1px solid rgba(99, 102, 241, 0.4);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .live-dot {
@@ -277,7 +283,7 @@ function selectTab(tab: 'search' | 'crawler' | 'indexer' | 'analytics' | 'system
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 
 .mode-toggle-btn {
@@ -291,40 +297,43 @@ function selectTab(tab: 'search' | 'crawler' | 'indexer' | 'analytics' | 'system
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 9px;
-  background: var(--bg-card-soft, rgba(255, 255, 255, 0.05));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-  color: var(--text-muted, #94a3b8);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--bg-surface-soft);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .icon-btn:hover {
-  color: var(--text-primary, #ffffff);
-  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  background: var(--border-color);
 }
 
 .login-trigger-btn {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.45rem 1rem;
-  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  border-radius: 9px;
+  border-radius: 8px;
   color: #ffffff;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #0f172a;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.dark-theme .login-trigger-btn {
+  background: #2563eb;
 }
 
 .login-trigger-btn:hover {
-  opacity: 0.92;
-  transform: translateY(-1px);
+  opacity: 0.9;
 }
 
 .user-menu-wrapper {
@@ -334,31 +343,35 @@ function selectTab(tab: 'search' | 'crawler' | 'indexer' | 'analytics' | 'system
 .user-btn {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.3rem 0.65rem 0.3rem 0.3rem;
-  background: var(--bg-card-soft, rgba(255, 255, 255, 0.06));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  gap: 0.5rem;
+  padding: 0.25rem 0.6rem 0.25rem 0.25rem;
+  background: var(--bg-surface-soft);
+  border: 1px solid var(--border-color);
   border-radius: 20px;
   cursor: pointer;
-  color: var(--text-primary, #ffffff);
+  color: var(--text-primary);
 }
 
 .user-avatar {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: #0f172a;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
 }
 
+.dark-theme .user-avatar {
+  background: #2563eb;
+}
+
 .user-email-text {
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .dropdown-menu {
@@ -366,30 +379,30 @@ function selectTab(tab: 'search' | 'crawler' | 'indexer' | 'analytics' | 'system
   top: calc(100% + 8px);
   right: 0;
   width: 220px;
-  background: var(--bg-surface, #1e293b);
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
-  border-radius: 12px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
   padding: 0.75rem;
   z-index: 1001;
 }
 
 .dropdown-user-email {
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  color: var(--text-primary, #ffffff);
+  color: var(--text-primary);
   word-break: break-all;
 }
 
 .dropdown-user-id {
   font-size: 0.72rem;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
   margin-top: 0.2rem;
 }
 
 .dropdown-divider {
   height: 1px;
-  background: var(--border-color, rgba(255, 255, 255, 0.08));
+  background: var(--border-color);
   margin: 0.6rem 0;
 }
 
@@ -410,7 +423,7 @@ function selectTab(tab: 'search' | 'crawler' | 'indexer' | 'analytics' | 'system
 }
 
 .dropdown-item.danger:hover {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.08);
 }
 
 @media (max-width: 900px) {
@@ -418,7 +431,7 @@ function selectTab(tab: 'search' | 'crawler' | 'indexer' | 'analytics' | 'system
     display: none;
   }
   .nav-tab {
-    padding: 0.45rem 0.6rem;
+    padding: 0.4rem 0.55rem;
   }
   .brand-subtitle {
     display: none;

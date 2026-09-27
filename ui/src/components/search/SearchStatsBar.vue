@@ -62,46 +62,47 @@ const emit = defineEmits<{
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-  margin-bottom: 1.25rem;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1rem;
   font-size: 0.82rem;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 .stats-left {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 
 .stats-text strong {
-  color: var(--text-primary, #ffffff);
+  color: var(--text-primary);
 }
 
 .latency {
   opacity: 0.8;
-  margin-left: 0.25rem;
+  margin-left: 0.2rem;
 }
 
 .token-tags {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 
 .token-prefix {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   opacity: 0.7;
 }
 
 .token-tag {
-  font-size: 0.72rem;
-  padding: 0.1rem 0.4rem;
-  background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
+  font-size: 0.7rem;
+  padding: 0.1rem 0.35rem;
+  background: var(--bg-surface-soft);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
 }
 
@@ -113,21 +114,21 @@ const emit = defineEmits<{
 .sort-controls {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
 }
 
 .sort-label {
   font-size: 0.78rem;
-  color: var(--text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 .sort-select {
-  background: var(--bg-card, #1e293b);
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
-  color: var(--text-primary, #ffffff);
-  border-radius: 8px;
-  padding: 0.25rem 0.6rem;
-  font-size: 0.8rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.78rem;
   outline: none;
   cursor: pointer;
 }
