@@ -1,47 +1,110 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import { ref, onMounted } from 'vue'
+import { useAuth } from './composables/useAuth'
+import { initConfigFromStorage } from './services/config'
+import AppHeader from './components/common/AppHeader.vue'
+import AppFooter from './components/common/AppFooter.vue'
+import AuthModal from './components/auth/AuthModal.vue'
+import Toast from './components/common/Toast.vue'
+
+import SearchView from './views/SearchView.vue'
+import CrawlerView from './views/CrawlerView.vue'
+import IndexerView from './views/IndexerView.vue'
+import AnalyticsView from './views/AnalyticsView.vue'
+import SystemView from './views/SystemView.vue'
+
+const activeTab = ref<'search' | 'crawler' | 'indexer' | 'analytics' | 'system'>('search')
+const { checkCurrentUser } = useAuth()
+
+onMounted(() => {
+  initConfigFromStorage()
+  checkCurrentUser()
+})
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <div class="app-layout">
+    <!-- Background subtle gradient glows -->
+    <div class="ambient-glow top-left"></div>
+    <div class="ambient-glow bottom-right"></div>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
+    <!-- Top Navigation Header -->
+    <AppHeader v-model:active-tab="activeTab" />
 
-  <main>
-    <TheWelcome />
-  </main>
+    <!-- Main View Content -->
+    <main class="app-main">
+      <Transition name="view-fade" mode="out-in">
+        <SearchView v-if="activeTab === 'search'" key="search" />
+        <CrawlerView v-else-if="activeTab === 'crawler'" key="crawler" />
+        <IndexerView v-else-if="activeTab === 'indexer'" key="indexer" />
+        <AnalyticsView v-else-if="activeTab === 'analytics'" key="analytics" />
+        <SystemView v-else-if="activeTab === 'system'" key="system" />
+      </Transition>
+    </main>
+
+    <!-- Global Footer -->
+    <AppFooter />
+
+    <!-- Global Auth Modal -->
+    <AuthModal />
+
+    <!-- Global Floating Toasts -->
+    <Toast />
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
+.app-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.ambient-glow {
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(120px);
+  opacity: 0.12;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+.ambient-glow.top-left {
+  top: -200px;
+  left: -200px;
+  background: radial-gradient(circle, #6366f1 0%, rgba(99, 102, 241, 0) 70%);
+}
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+.ambient-glow.bottom-right {
+  bottom: -200px;
+  right: -200px;
+  background: radial-gradient(circle, #06b6d4 0%, rgba(6, 182, 212, 0) 70%);
+}
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.app-main {
+  flex: 1;
+  padding: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Smooth view transition */
+.view-fade-enter-active,
+.view-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.view-fade-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.view-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 </style>
