@@ -131,124 +131,129 @@ async function handleSubmit() {
 .auth-modal-content {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 .auth-tabs {
   display: flex;
-  background: var(--bg-card-soft, rgba(0, 0, 0, 0.25));
-  border-radius: 10px;
-  padding: 0.25rem;
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  background: var(--bg-surface-soft);
+  border-radius: 8px;
+  padding: 0.2rem;
+  border: 1px solid var(--border-color);
 }
 
 .auth-tab {
   flex: 1;
-  padding: 0.5rem;
+  padding: 0.45rem;
   background: transparent;
   border: none;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-muted, #94a3b8);
+  border-radius: 6px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .auth-tab.active {
-  background: rgba(99, 102, 241, 0.25);
-  color: #ffffff;
-  border: 1px solid rgba(99, 102, 241, 0.4);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 .demo-account-box {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px dashed rgba(99, 102, 241, 0.3);
-  padding: 0.55rem 0.85rem;
+  background: var(--bg-surface-soft);
+  border: 1px dashed var(--border-color);
+  padding: 0.45rem 0.75rem;
   border-radius: 8px;
-  font-size: 0.78rem;
-  color: var(--text-secondary, #cbd5e1);
+  font-size: 0.76rem;
+  color: var(--text-secondary);
 }
 
 .demo-fill-btn {
-  background: rgba(99, 102, 241, 0.2);
-  border: 1px solid rgba(99, 102, 241, 0.4);
-  color: #818cf8;
-  font-size: 0.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--accent-primary);
+  font-size: 0.74rem;
   font-weight: 600;
-  padding: 0.2rem 0.55rem;
-  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  border-radius: 5px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .demo-fill-btn:hover {
-  background: rgba(99, 102, 241, 0.35);
-  color: #ffffff;
+  background: var(--bg-surface-soft);
+  color: var(--text-primary);
 }
 
 .form-error-alert {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
-  padding: 0.6rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
 }
 
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 
 .form-label {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: var(--text-secondary, #cbd5e1);
+  color: var(--text-secondary);
 }
 
 .input-field {
-  background: var(--bg-card-soft, rgba(0, 0, 0, 0.2));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
-  border-radius: 10px;
-  padding: 0.65rem 0.85rem;
-  font-size: 0.88rem;
-  color: var(--text-primary, #ffffff);
+  background: var(--bg-surface-soft);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.86rem;
+  color: var(--text-primary);
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.15s ease;
 }
 
 .input-field:focus {
-  border-color: #6366f1;
+  border-color: var(--accent-primary);
 }
 
 .submit-auth-btn {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: #0f172a;
   color: #ffffff;
   border: none;
-  padding: 0.75rem;
-  border-radius: 10px;
-  font-size: 0.9rem;
+  padding: 0.65rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
-  transition: all 0.2s ease;
-  margin-top: 0.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+  margin-top: 0.35rem;
+}
+
+.dark-theme .submit-auth-btn {
+  background: #2563eb;
 }
 
 .submit-auth-btn:hover:not(:disabled) {
-  opacity: 0.92;
-  transform: translateY(-1px);
+  opacity: 0.9;
 }
 
 .submit-auth-btn:disabled {
