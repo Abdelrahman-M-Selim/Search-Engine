@@ -77,6 +77,12 @@ function handleGlobalShortcut(e: KeyboardEvent) {
   }
 }
 
+function handleBlur() {
+  setTimeout(() => {
+    isFocused.value = false
+  }, 200)
+}
+
 onMounted(() => {
   window.addEventListener('keydown', handleGlobalShortcut)
   if (props.autoFocus) {
@@ -104,7 +110,7 @@ onUnmounted(() => {
         :placeholder="placeholder || 'Search indexed documents, topics, or keywords... (Press \'/\' to focus)'"
         @input="handleInput"
         @focus="isFocused = true"
-        @blur="setTimeout(() => isFocused = false, 200)"
+        @blur="handleBlur"
         @keydown="handleKeyDown"
       />
 
