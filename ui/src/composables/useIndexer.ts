@@ -21,7 +21,7 @@ export function useIndexer() {
       status.value = await indexerService.getIndexStatus()
       termsList.value = await indexerService.getAllTerms()
       if (termsList.value.length > 0 && !selectedTerm.value) {
-        selectedTerm.value = termsList.value[0]
+        selectedTerm.value = termsList.value[0] || null
       }
     } catch (err) {
       console.error('Indexer fetch failed:', err)
