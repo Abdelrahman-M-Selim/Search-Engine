@@ -11,7 +11,7 @@ db_pool: Optional[asyncpg.Pool] = None
 
 
 async def init_db_pool() -> None:
-    """Initialize the PostgreSQL connection pool (fail-open/resilient on startup)."""
+    """Initialize the PostgreSQL connection pool."""
     global db_pool
     settings = get_settings()
     try:
