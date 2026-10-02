@@ -22,7 +22,7 @@ logger = logging.getLogger("indexer-service")
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager for startup and shutdown events."""
     logger.info("Starting Indexer Service...")
-    # Initialize connection pools (PostgreSQL)
+    # Initialize connection pools
     await init_db_pool()
     # Start Kafka background consumer
     await start_kafka_consumer()

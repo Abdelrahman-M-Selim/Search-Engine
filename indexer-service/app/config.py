@@ -1,5 +1,12 @@
 from functools import lru_cache
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Root project directory and service directory paths
+BASE_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = BASE_DIR.parent
+ROOT_ENV_FILE = ROOT_DIR / ".env"
+LOCAL_ENV_FILE = BASE_DIR / ".env"
 
 
 class Settings(BaseSettings):
@@ -26,7 +33,7 @@ class Settings(BaseSettings):
     MAX_WORD_LENGTH: int = 50
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(ROOT_ENV_FILE, LOCAL_ENV_FILE, ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
     )
@@ -34,5 +41,4 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    """Return cached settings instance."""
     return Settings()
