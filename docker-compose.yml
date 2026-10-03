@@ -153,6 +153,8 @@ services:
       context: ./crawler-service
       dockerfile: Dockerfile
     container_name: search_crawler_service
+    ports:
+      - "8001:8000"
     environment:
       - DATABASE_URL=${DATABASE_URL:-postgresql://user:password@postgres:5432/search_engine}
       - KAFKA_BROKER=${KAFKA_BROKER:-kafka:9092}
