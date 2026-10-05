@@ -25,22 +25,20 @@ onMounted(() => {
       <div class="header-text-group">
         <div class="title-row">
           <h2 class="section-title">Microservices Architecture Topology</h2>
-            <button
-              class="btn-action ping-btn"
-              :disabled="isPinging"
-              @click="checkHealth"
-            >
-              <span v-if="isPinging">Pinging Services...</span>
-              <span v-else>⚡ Ping All Services</span>
-            </button>
-          </div>
+          <button
+            class="btn-action ping-btn"
+            :disabled="isPinging"
+            @click="checkHealth"
+          >
+            <span v-if="isPinging">Pinging Services...</span>
+            <span v-else>⚡ Ping All Services</span>
+          </button>
         </div>
         <p class="section-desc">
           Polyglot microservices stack communicating synchronously via Nginx Gateway HTTP routes and
           asynchronously via Kafka event streams.
         </p>
       </div>
-    </div>
     </div>
 
     <!-- Microservices Topology Grid -->
