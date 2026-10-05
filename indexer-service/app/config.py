@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     MAX_WORD_LENGTH: int = 50
 
     model_config = SettingsConfigDict(
-        env_file=(ROOT_ENV_FILE, LOCAL_ENV_FILE, ".env"),
+        env_file=str(ROOT_ENV_FILE) if ROOT_ENV_FILE.exists() else ".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )
