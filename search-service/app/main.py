@@ -7,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.cache import close_redis_pool, init_redis_pool
 from app.config import get_settings
+from app.db import close_db_pool, init_db_pool
+from app.kafka_producer import close_kafka_producer, init_kafka_producer
 from app.routes import router
 
 # Configure logging
@@ -21,12 +23,16 @@ logger = logging.getLogger("search-service")
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager for startup and shutdown events."""
     logger.info("Starting Search Service...")
-    # Initialize connection pools (Redis, etc.)
+    # Initialize connection pools & clients
+    await init_db_pool()
     await init_redis_pool()
+    await init_kafka_producer()
     yield
     # Cleanup on shutdown
     logger.info("Shutting down Search Service...")
+    await close_kafka_producer()
     await close_redis_pool()
+    await close_db_pool()
 
 
 settings = get_settings()

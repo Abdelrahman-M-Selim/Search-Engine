@@ -1,5 +1,10 @@
 from functools import lru_cache
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = BASE_DIR.parent
+ROOT_ENV_FILE = ROOT_DIR / ".env"
 
 
 class Settings(BaseSettings):
@@ -28,7 +33,7 @@ class Settings(BaseSettings):
     MAX_PAGE_SIZE: int = 100
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(ROOT_ENV_FILE) if ROOT_ENV_FILE.exists() else ".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )

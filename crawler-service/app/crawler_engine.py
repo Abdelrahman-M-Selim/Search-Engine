@@ -39,13 +39,17 @@ class CrawlerEngine:
 
     async def _worker_loop(self):
         while self.running:
-            urls = await db.pop_urls(settings.crawl_concurrency)
-            if not urls:
+            try:
+                urls = await db.pop_urls(settings.crawl_concurrency)
+                if not urls:
+                    await asyncio.sleep(2)
+                    continue
+                
+                tasks = [self._crawl_url(record['url'], record['depth']) for record in urls]
+                await asyncio.gather(*tasks)
+            except Exception as e:
+                logger.error(f"Error in worker loop: {e}", exc_info=True)
                 await asyncio.sleep(2)
-                continue
-            
-            tasks = [self._crawl_url(record['url'], record['depth']) for record in urls]
-            await asyncio.gather(*tasks)
 
     def _is_valid_url(self, path: str) -> bool:
         path = path.lower()
