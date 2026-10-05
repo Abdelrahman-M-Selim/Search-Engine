@@ -25,7 +25,6 @@ onMounted(() => {
       <div class="header-text-group">
         <div class="title-row">
           <h2 class="section-title">Microservices Architecture Topology</h2>
-          <div class="actions-row">
             <button
               class="btn-action ping-btn"
               :disabled="isPinging"
@@ -33,12 +32,6 @@ onMounted(() => {
             >
               <span v-if="isPinging">Pinging Services...</span>
               <span v-else>⚡ Ping All Services</span>
-            </button>
-            <button
-              class="btn-action mode-btn"
-              @click="toggleMockMode"
-            >
-              Switch to {{ isMock ? 'Live Gateway' : 'Mock Mode' }}
             </button>
           </div>
         </div>
@@ -48,19 +41,6 @@ onMounted(() => {
         </p>
       </div>
     </div>
-
-    <!-- Active Mode Notice -->
-    <div class="mode-notice" :class="{ 'notice-mock': isMock, 'notice-live': !isMock }">
-      <div class="notice-indicator"></div>
-      <div class="notice-text">
-        <strong v-if="isMock">Running in Simulated Mock Layer:</strong>
-        <strong v-else>Connected to Live API Gateway:</strong>
-        {{
-          isMock
-            ? 'All service contracts, inverted index algorithms, and event streams are running with full fidelity in-memory without needing Docker containers started.'
-            : 'Requests are routed through http://localhost:8000 with CORS and JWT verification.'
-        }}
-      </div>
     </div>
 
     <!-- Microservices Topology Grid -->
