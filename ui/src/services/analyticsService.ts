@@ -6,7 +6,7 @@ export const analyticsService = {
     return await httpClient.post<{ status: string }>('/analytics/click', payload)
   },
 
-  async logSearch(query: string, userId?: string | null): Promise<void> {
+  async logSearch(query: string, userId?: string | null, _resultCount?: number): Promise<void> {
     try {
       await httpClient.post('/analytics/search', {
         query,
