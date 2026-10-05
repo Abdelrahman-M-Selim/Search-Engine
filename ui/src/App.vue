@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useAuth } from './composables/useAuth'
-import { initConfigFromStorage } from './services/config'
 import AppHeader from './components/common/AppHeader.vue'
 import AppFooter from './components/common/AppFooter.vue'
 import AuthModal from './components/auth/AuthModal.vue'
@@ -17,7 +16,6 @@ const activeTab = ref<'search' | 'crawler' | 'indexer' | 'analytics' | 'system'>
 const { checkCurrentUser } = useAuth()
 
 onMounted(() => {
-  initConfigFromStorage()
   checkCurrentUser()
 })
 </script>
