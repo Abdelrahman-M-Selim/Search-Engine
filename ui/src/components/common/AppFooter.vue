@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSystemHealth } from '../../composables/useSystemHealth'
 
-const { healthSummary, isMock } = useSystemHealth()
+const { healthSummary } = useSystemHealth()
 </script>
 
 <template>
@@ -16,7 +16,7 @@ const { healthSummary, isMock } = useSystemHealth()
         <span class="status-dot"></span>
         <span class="status-text">All Systems Operational</span>
         <span class="divider">·</span>
-        <span class="mode-text">{{ isMock ? 'Mock Engine' : 'Live Gateway' }}</span>
+        <span class="mode-text">Live Gateway</span>
       </div>
 
       <div class="footer-copyright">

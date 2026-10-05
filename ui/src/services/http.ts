@@ -72,9 +72,3 @@ export class HttpClient {
 }
 
 export const httpClient = new HttpClient()
-
-// Utility for mock delay
-export function simulateDelay(ms?: number): Promise<void> {
-  const delay = ms ?? config.mockLatencyMs
-  return new Promise((resolve) => setTimeout(resolve, delay))
-}

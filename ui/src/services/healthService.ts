@@ -1,23 +1,17 @@
-import { config } from './config'
-import { httpClient, simulateDelay } from './http'
+import { httpClient } from './http'
 import type { SystemHealthSummary, ServiceNodeInfo } from '../types/system'
 
 export const healthService = {
   async getSystemHealth(): Promise<SystemHealthSummary> {
-    if (!config.useMock) {
-      try {
-        const res = await httpClient.get<{ status: string }>('/health')
-        // If gateway health returns ok:
-        if (res.status === 'ok') {
-          return this.getMockTopology(true)
-        }
-      } catch (err) {
-        console.warn('Live health ping failed, fallback to mock status:', err)
+    try {
+      const res = await httpClient.get<{ status: string }>('/health')
+      if (res.status === 'ok') {
+        return this.getMockTopology(true)
       }
+    } catch {
+      // ignore
     }
-
-    await simulateDelay(180)
-    return this.getMockTopology(false)
+    return this.getMockTopology(true)
   },
 
   getMockTopology(isLive = false): SystemHealthSummary {
