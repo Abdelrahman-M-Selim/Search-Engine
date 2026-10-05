@@ -7,9 +7,7 @@ import StatusBadge from '../common/StatusBadge.vue'
 const {
   healthSummary,
   isPinging,
-  isMock,
-  checkHealth,
-  toggleMockMode
+  checkHealth
 } = useSystemHealth()
 
 onMounted(() => {

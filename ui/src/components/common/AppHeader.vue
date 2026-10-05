@@ -22,7 +22,6 @@ const emit = defineEmits<{
 }>()
 
 const { user, isAuthenticated, logout, openAuthModal } = useAuth()
-const { isMock, toggleMockMode } = useSystemHealth()
 const { theme, toggleTheme } = useTheme()
 
 const showUserMenu = ref(false)
@@ -97,18 +96,6 @@ function selectTab(tab: 'search' | 'crawler' | 'indexer' | 'analytics' | 'system
 
       <!-- Right Action Bar -->
       <div class="header-actions">
-        <!-- Mock / Live Mode Toggle -->
-        <button
-          class="mode-toggle-btn"
-          :class="{ 'is-mock': isMock, 'is-live': !isMock }"
-          @click="toggleMockMode"
-          :title="isMock ? 'Running on Mock Service Layer. Click to switch to Live Backend.' : 'Running on Live Gateway. Click to switch to Mock Mode.'"
-        >
-          <StatusBadge :status="isMock ? 'running' : 'healthy'" size="sm" pulse>
-            {{ isMock ? 'Mock Engine' : 'Live Gateway' }}
-          </StatusBadge>
-        </button>
-
         <!-- Theme Toggle -->
         <button class="icon-btn theme-btn" @click="toggleTheme" title="Toggle Light / Dark Mode">
           <IconSun v-if="theme === 'dark'" />
