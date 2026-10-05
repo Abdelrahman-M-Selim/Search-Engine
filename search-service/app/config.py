@@ -5,7 +5,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_DIR = BASE_DIR.parent
 ROOT_ENV_FILE = ROOT_DIR / ".env"
-LOCAL_ENV_FILE = BASE_DIR / ".env"
 
 
 class Settings(BaseSettings):
