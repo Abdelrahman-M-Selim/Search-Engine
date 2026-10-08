@@ -14,7 +14,11 @@ const {
   delaySeconds,
   startCrawl,
   stopCrawl,
-  refreshStatus
+  refreshStatus,
+  currentPage,
+  totalPages,
+  totalItems,
+  changePage
 } = useCrawler()
 
 onMounted(() => {
@@ -137,9 +141,9 @@ onMounted(() => {
       <div class="feed-panel card">
         <div class="feed-header">
           <h3 class="card-heading">
-            <span>Discovered Pages Feed</span>
+            <span>Discovered Pages Feed ({{ totalItems }})</span>
           </h3>
-          <button class="refresh-btn" @click="refreshStatus" title="Refresh Feed">
+          <button class="refresh-btn" @click="refreshStatus()" title="Refresh Feed">
             ↻ Refresh
           </button>
         </div>
