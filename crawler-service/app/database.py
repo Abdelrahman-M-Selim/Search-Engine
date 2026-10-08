@@ -81,4 +81,34 @@ class Database:
                 RETURNING id
             """, url, title, content)
 
+    async def get_recent_pages(self, page: int = 1, limit: int = 50):
+        if not self.pool: return {"items": [], "total": 0, "page": page, "size": limit, "total_pages": 1}
+        offset = (page - 1) * limit
+        async with self.pool.acquire() as conn:
+            total = await conn.fetchval("SELECT COUNT(*) FROM pages")
+            records = await conn.fetch("""
+                SELECT id, url, title, content, created_at
+                FROM pages
+                ORDER BY created_at DESC
+                LIMIT $1 OFFSET $2
+            """, limit, offset)
+            
+            results = []
+            for r in records:
+                results.append({
+                    "id": r["id"],
+                    "url": r["url"],
+                    "title": r["title"] or "No Title",
+                    "status_code": 200,
+                    "word_count": len(str(r["content"]).split()) if r["content"] else 0,
+                    "crawled_at": r["created_at"].isoformat()
+                })
+            return {
+                "items": results,
+                "total": total,
+                "page": page,
+                "size": limit,
+                "total_pages": (total + limit - 1) // limit if total else 1
+            }
+
 db = Database()
