@@ -9,10 +9,16 @@ import StatusBadge from '../common/StatusBadge.vue'
 const {
   status,
   termsList,
+  currentTermsPage,
+  totalTermsPages,
   selectedTerm,
+  currentPostingsPage,
+  totalPostingsPages,
   searchTermQuery,
   refreshIndexStatus,
-  selectPosting
+  selectPosting,
+  changeTermsPage,
+  changePostingsPage
 } = useIndexer()
 
 const filterQuery = ref('')
@@ -96,11 +102,16 @@ onMounted(() => {
           >
             <span class="term-name">#{{ item.term }}</span>
             <span class="doc-count-pill">{{ item.doc_count }} docs</span>
-          </button>
+            </button>
+          </div>
+          <div class="pagination-bar" v-if="totalTermsPages > 1">
+            <button class="btn btn-primary" :disabled="currentTermsPage <= 1" @click="changeTermsPage(currentTermsPage - 1)">Prev</button>
+            <span class="page-info">Page {{ currentTermsPage }} of {{ totalTermsPages }}</span>
+            <button class="btn btn-primary" :disabled="currentTermsPage >= totalTermsPages" @click="changeTermsPage(currentTermsPage + 1)">Next</button>
+          </div>
         </div>
-      </div>
 
-      <!-- Right: Postings & Term Occurrences Detail -->
+        <!-- Right: Postings & Term Occurrences Detail -->
       <div class="postings-detail card">
         <div v-if="selectedTerm" class="detail-content">
           <div class="postings-header">
@@ -154,6 +165,11 @@ onMounted(() => {
                 </div>
               </div>
             </div>
+            <div class="pagination-bar" v-if="totalPostingsPages > 1">
+              <button class="btn btn-primary" :disabled="currentPostingsPage <= 1" @click="changePostingsPage(currentPostingsPage - 1)">Prev</button>
+              <span class="page-info">Page {{ currentPostingsPage }} of {{ totalPostingsPages }}</span>
+              <button class="btn btn-primary" :disabled="currentPostingsPage >= totalPostingsPages" @click="changePostingsPage(currentPostingsPage + 1)">Next</button>
+            </div>
           </div>
         </div>
 
@@ -166,6 +182,39 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* Scrollbar styling for a cleaner look */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.pagination-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border-color);
+}
+.pagination-bar .btn {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+}
+.page-info {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
 .indexer-dashboard {
   display: flex;
   flex-direction: column;
@@ -315,44 +364,57 @@ onMounted(() => {
 .terms-list {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  max-height: 420px;
+  gap: 0.5rem;
+  height: 500px;
   overflow-y: auto;
+  padding-right: 0.4rem;
 }
 
 .term-item-btn {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.45rem 0.65rem;
-  border-radius: 6px;
-  background: transparent;
-  border: 1px solid transparent;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  background: var(--bg-surface-soft);
+  border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  font-size: 0.82rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: all 0.15s ease;
   text-align: left;
 }
 
 .term-item-btn:hover {
-  background: var(--bg-surface-soft);
+  background: var(--bg-surface);
+  border-color: var(--accent-primary);
   color: var(--text-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .term-item-btn.active {
-  background: var(--bg-surface-soft);
-  border-color: var(--border-color);
-  color: var(--accent-primary);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: white;
   font-weight: 600;
 }
 
 .doc-count-pill {
-  font-size: 0.7rem;
-  background: var(--border-color);
-  padding: 0.05rem 0.35rem;
-  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
   color: var(--text-muted);
+}
+
+.term-item-btn.active .doc-count-pill {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
 }
 
 .detail-content {
@@ -392,7 +454,10 @@ onMounted(() => {
 .occurrences-table {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.5rem;
+  height: 440px;
+  overflow-y: auto;
+  padding-right: 0.4rem;
 }
 
 .table-header {
@@ -417,6 +482,13 @@ onMounted(() => {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 0.65rem 0.75rem;
+  transition: all 0.15s ease;
+}
+.table-row:hover {
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--accent-primary);
+  transform: translateY(-1px);
 }
 
 .id-badge {
@@ -492,3 +564,5 @@ onMounted(() => {
   }
 }
 </style>
+
+

@@ -1,5 +1,5 @@
 import { httpClient } from './http'
-import type { CrawlJobRequest, CrawlStatusResponse, CrawledPageRecord } from '../types/crawler'
+import type { CrawlJobRequest, CrawlStatusResponse, CrawledPageRecord, PaginatedPages } from '../types/crawler'
 
 export const crawlerService = {
   async startCrawl(req: CrawlJobRequest): Promise<{ status: string; message?: string; url?: string }> {
@@ -27,10 +27,18 @@ export const crawlerService = {
   },
 
   async stopCrawl(): Promise<{ status: string }> {
-    return { status: 'stopped' }
+    try {
+      return await httpClient.post<{ status: string }>('/crawl/stop')
+    } catch {
+      return { status: 'stopped' }
+    }
   },
 
-  async getCrawledPages(): Promise<CrawledPageRecord[]> {
-    return []
+  async getCrawledPages(page: number = 1, limit: number = 20): Promise<PaginatedPages> {
+    try {
+      return await httpClient.get<PaginatedPages>('/crawl/pages', { page, limit })
+    } catch {
+      return { items: [], total: 0, page, size: limit, total_pages: 1 }
+    }
   }
 }

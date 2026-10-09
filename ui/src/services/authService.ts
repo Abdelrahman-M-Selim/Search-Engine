@@ -20,7 +20,7 @@ export const authService = {
     if (!token) return null
 
     try {
-      return await httpClient.get<User>('/auth/me')
+      return await httpClient.get<User>('/auth/profile')
     } catch {
       const storedUser = localStorage.getItem(USER_STORAGE_KEY)
       if (storedUser) {

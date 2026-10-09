@@ -179,3 +179,64 @@ async def get_index_stats() -> Tuple[int, int]:
     except Exception as exc:
         logger.warning("Failed to query index stats from DB: %s", exc)
         return 0, 0
+
+async def get_top_terms(page: int = 1, limit: int = 100):
+    if not db_pool: return {"items": [], "total": 0, "page": page, "size": limit, "total_pages": 1}
+    offset = (page - 1) * limit
+    async with db_pool.acquire() as conn:
+        total = await conn.fetchval("SELECT COUNT(DISTINCT term) FROM inverted_index")
+        records = await conn.fetch(
+            """
+            SELECT term, COUNT(page_id) as doc_count 
+            FROM inverted_index 
+            GROUP BY term 
+            ORDER BY doc_count DESC 
+            LIMIT $1 OFFSET $2
+            """, limit, offset
+        )
+        items = [{"term": r["term"], "doc_count": r["doc_count"]} for r in records]
+        return {
+            "items": items,
+            "total": total,
+            "page": page,
+            "size": limit,
+            "total_pages": (total + limit - 1) // limit if total else 1
+        }
+
+async def get_term_postings(term: str, page: int = 1, limit: int = 50):
+    if not db_pool: return None
+    offset = (page - 1) * limit
+    async with db_pool.acquire() as conn:
+        doc_count = await conn.fetchval(
+            "SELECT COUNT(page_id) FROM inverted_index WHERE term = $1", term
+        )
+        if not doc_count:
+            return None
+        
+        records = await conn.fetch(
+            """
+            SELECT i.page_id, i.term_frequency, p.title, p.url 
+            FROM inverted_index i 
+            JOIN pages p ON i.page_id = p.id 
+            WHERE i.term = $1 
+            ORDER BY i.term_frequency DESC
+            LIMIT $2 OFFSET $3
+            """, term, limit, offset
+        )
+        occurrences = [
+            {
+                "page_id": r["page_id"],
+                "title": r["title"] or "No Title",
+                "url": r["url"],
+                "term_frequency": r["term_frequency"]
+            } for r in records
+        ]
+        
+        return {
+            "term": term,
+            "doc_count": doc_count,
+            "occurrences": occurrences,
+            "page": page,
+            "size": limit,
+            "total_pages": (doc_count + limit - 1) // limit if doc_count else 1
+        }

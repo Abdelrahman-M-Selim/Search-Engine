@@ -11,6 +11,9 @@ const status = ref<CrawlStatusResponse>({
 })
 
 const crawledPages = ref<CrawledPageRecord[]>([])
+const currentPage = ref(1)
+const totalPages = ref(1)
+const totalItems = ref(0)
 const isLoading = ref(false)
 const seedUrlsInput = ref(
   'https://fastapi.tiangolo.com\nhttps://docs.nestjs.com\nhttps://www.postgresql.org/docs\nhttps://redis.io/docs\nhttps://kafka.apache.org'
@@ -22,12 +25,22 @@ let pollInterval: ReturnType<typeof setInterval> | null = null
 export function useCrawler() {
   const toast = useToast()
 
-  async function refreshStatus() {
+  async function refreshStatus(page = currentPage.value) {
     try {
       status.value = await crawlerService.getCrawlStatus()
-      crawledPages.value = await crawlerService.getCrawledPages()
+      const pagedData = await crawlerService.getCrawledPages(page, 20)
+      crawledPages.value = pagedData.items
+      currentPage.value = pagedData.page
+      totalPages.value = pagedData.total_pages
+      totalItems.value = pagedData.total
     } catch (err) {
       console.error('Crawler status fetch failed:', err)
+    }
+  }
+
+  function changePage(newPage: number) {
+    if (newPage > 0 && newPage <= totalPages.value) {
+      refreshStatus(newPage)
     }
   }
 
@@ -93,12 +106,16 @@ export function useCrawler() {
   return {
     status,
     crawledPages,
+    currentPage,
+    totalPages,
+    totalItems,
     isLoading,
     seedUrlsInput,
     maxPages,
     delaySeconds,
     startCrawl,
     stopCrawl,
-    refreshStatus
+    refreshStatus,
+    changePage
   }
 }

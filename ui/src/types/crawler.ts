@@ -22,3 +22,11 @@ export interface CrawledPageRecord {
   word_count: number
   status_code: number
 }
+
+export interface PaginatedPages {
+  items: CrawledPageRecord[]
+  total: number
+  page: number
+  size: number
+  total_pages: number
+}
