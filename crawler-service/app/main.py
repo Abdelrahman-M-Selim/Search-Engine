@@ -45,7 +45,7 @@ async def get_status():
     }
 
 @app.get("/pages")
-async def get_recent_pages(page: int = 1, limit: int = 50):
+async def get_recent_pages(page: int = 1, limit: int = 10):
     return await db.get_recent_pages(page, limit)
 
 @app.get("/health")
