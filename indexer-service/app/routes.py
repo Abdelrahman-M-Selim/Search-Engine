@@ -102,11 +102,11 @@ from fastapi import HTTPException
 from app.indexer import get_top_terms, get_term_postings
 
 @router.get("/index/terms", summary="Get top terms")
-async def fetch_top_terms(page: int = 1, limit: int = 100):
+async def fetch_top_terms(page: int = 1, limit: int = 20):
     return await get_top_terms(page, limit)
 
 @router.get("/index/terms/{term}", summary="Get postings for a term")
-async def fetch_term_postings(term: str, page: int = 1, limit: int = 50):
+async def fetch_term_postings(term: str, page: int = 1, limit: int = 20):
     res = await get_term_postings(term, page, limit)
     if not res:
         raise HTTPException(status_code=404, detail="Term not found")

@@ -81,7 +81,7 @@ class Database:
                 RETURNING id
             """, url, title, content)
 
-    async def get_recent_pages(self, page: int = 1, limit: int = 50):
+    async def get_recent_pages(self, page: int = 1, limit: int = 10):
         if not self.pool: return {"items": [], "total": 0, "page": page, "size": limit, "total_pages": 1}
         offset = (page - 1) * limit
         async with self.pool.acquire() as conn:

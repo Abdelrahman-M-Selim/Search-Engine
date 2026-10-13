@@ -28,7 +28,7 @@ export function useCrawler() {
   async function refreshStatus(page = currentPage.value) {
     try {
       status.value = await crawlerService.getCrawlStatus()
-      const pagedData = await crawlerService.getCrawledPages(page, 20)
+      const pagedData = await crawlerService.getCrawledPages(page, 10)
       crawledPages.value = pagedData.items
       currentPage.value = pagedData.page
       totalPages.value = pagedData.total_pages

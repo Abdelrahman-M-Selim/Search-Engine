@@ -6,7 +6,7 @@ export const indexerService = {
     return await httpClient.get<IndexStatusResponse>('/index/status')
   },
 
-  async getAllTerms(page: number = 1, limit: number = 100): Promise<PaginatedTerms> {
+  async getAllTerms(page: number = 1, limit: number = 20): Promise<PaginatedTerms> {
     try {
       return await httpClient.get<PaginatedTerms>('/index/terms', { page, limit })
     } catch {
@@ -14,7 +14,7 @@ export const indexerService = {
     }
   },
 
-  async inspectTerm(term: string, page: number = 1, limit: number = 50): Promise<PaginatedPostings | null> {
+  async inspectTerm(term: string, page: number = 1, limit: number = 20): Promise<PaginatedPostings | null> {
     try {
       return await httpClient.get<PaginatedPostings>(`/index/terms/${encodeURIComponent(term)}`, { page, limit })
     } catch {

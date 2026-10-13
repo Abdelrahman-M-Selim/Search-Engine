@@ -24,8 +24,11 @@ export function useIndexer() {
   async function refreshIndexStatus(page = currentTermsPage.value) {
     try {
       isLoading.value = true
-      status.value = await indexerService.getIndexStatus()
-      const termsRes = await indexerService.getAllTerms(page, 100)
+      const [statusRes, termsRes] = await Promise.all([
+        indexerService.getIndexStatus(),
+        indexerService.getAllTerms(page, 20)
+      ])
+      status.value = statusRes
       termsList.value = termsRes.items
       currentTermsPage.value = termsRes.page
       totalTermsPages.value = termsRes.total_pages
@@ -46,7 +49,7 @@ export function useIndexer() {
   async function inspectTerm(term: string, page = currentPostingsPage.value) {
     if (!term.trim()) return
     try {
-      const result = await indexerService.inspectTerm(term, page, 50)
+      const result = await indexerService.inspectTerm(term, page, 20)
       if (result) {
         selectedTerm.value = result
         currentPostingsPage.value = result.page
