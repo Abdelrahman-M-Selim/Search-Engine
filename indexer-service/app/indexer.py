@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Any, Dict, Optional, Tuple
 import asyncpg
 from app.config import get_settings
@@ -19,9 +20,21 @@ async def init_db_pool() -> None:
             dsn=settings.DATABASE_URL,
             min_size=1,
             max_size=10,
-            command_timeout=10.0,
+            command_timeout=15.0,
         )
         logger.info("Connected to PostgreSQL database successfully.")
+        try:
+            async with db_pool.acquire() as conn:
+                await conn.execute("""
+                    CREATE MATERIALIZED VIEW IF NOT EXISTS mv_term_stats AS
+                    SELECT term, COUNT(page_id) AS doc_count 
+                    FROM inverted_index 
+                    GROUP BY term;
+                    CREATE UNIQUE INDEX IF NOT EXISTS idx_mv_term_stats_term ON mv_term_stats (term);
+                    CREATE INDEX IF NOT EXISTS idx_mv_term_stats_doc_count ON mv_term_stats (doc_count DESC);
+                """)
+        except Exception as view_exc:
+            logger.warning("Could not create or verify mv_term_stats view: %s", view_exc)
     except Exception as exc:
         logger.warning(
             "PostgreSQL connection failed on startup (%s). Service will operate in degraded/fail-open mode.",
@@ -152,58 +165,78 @@ async def index_page(
         }
 
 
+_stats_cache: Dict[str, Any] = {"data": None, "timestamp": 0.0}
+
 async def get_index_stats() -> Tuple[int, int]:
     """
-    Retrieve statistics from the inverted_index table.
+    Retrieve statistics using fast indexed queries and in-memory caching.
     Returns (total_indexed_pages, total_unique_terms).
     """
+    global _stats_cache
     if not db_pool:
         return 0, 0
 
+    now = time.time()
+    if _stats_cache["data"] and (now - _stats_cache["timestamp"] < 30.0):
+        return _stats_cache["data"]
+
     try:
         async with db_pool.acquire() as conn:
-            row = await conn.fetchrow(
-                """
-                SELECT 
-                    COUNT(DISTINCT page_id) AS total_pages,
-                    COUNT(DISTINCT term) AS total_terms
-                FROM inverted_index
-                """
-            )
-            if row:
-                return (
-                    row["total_pages"] or 0,
-                    row["total_terms"] or 0,
-                )
-            return 0, 0
+            # Query pages count directly (sub-millisecond instead of scanning 7.2M inverted_index rows)
+            total_pages = await conn.fetchval("SELECT COUNT(*) FROM pages") or 0
+
+            # Query total terms count from materialized view (or fallback)
+            try:
+                total_terms = await conn.fetchval("SELECT COUNT(*) FROM mv_term_stats") or 0
+            except Exception:
+                total_terms = await conn.fetchval("SELECT COUNT(DISTINCT term) FROM inverted_index") or 0
+
+            result = (total_pages, total_terms)
+            _stats_cache["data"] = result
+            _stats_cache["timestamp"] = now
+            return result
     except Exception as exc:
         logger.warning("Failed to query index stats from DB: %s", exc)
-        return 0, 0
+        return _stats_cache["data"] or (0, 0)
 
-async def get_top_terms(page: int = 1, limit: int = 100):
-    if not db_pool: return {"items": [], "total": 0, "page": page, "size": limit, "total_pages": 1}
+async def get_top_terms(page: int = 1, limit: int = 20):
+    if not db_pool:
+        return {"items": [], "total": 0, "page": page, "size": limit, "total_pages": 1}
     offset = (page - 1) * limit
     async with db_pool.acquire() as conn:
-        total = await conn.fetchval("SELECT COUNT(DISTINCT term) FROM inverted_index")
-        records = await conn.fetch(
-            """
-            SELECT term, COUNT(page_id) as doc_count 
-            FROM inverted_index 
-            GROUP BY term 
-            ORDER BY doc_count DESC 
-            LIMIT $1 OFFSET $2
-            """, limit, offset
-        )
+        try:
+            total = await conn.fetchval("SELECT COUNT(*) FROM mv_term_stats")
+            records = await conn.fetch(
+                """
+                SELECT term, doc_count 
+                FROM mv_term_stats 
+                ORDER BY doc_count DESC 
+                LIMIT $1 OFFSET $2
+                """, limit, offset
+            )
+        except Exception:
+            # Fallback if view doesn't exist
+            total = await conn.fetchval("SELECT COUNT(DISTINCT term) FROM inverted_index")
+            records = await conn.fetch(
+                """
+                SELECT term, COUNT(page_id) as doc_count 
+                FROM inverted_index 
+                GROUP BY term 
+                ORDER BY doc_count DESC 
+                LIMIT $1 OFFSET $2
+                """, limit, offset
+            )
+
         items = [{"term": r["term"], "doc_count": r["doc_count"]} for r in records]
         return {
             "items": items,
-            "total": total,
+            "total": total or 0,
             "page": page,
             "size": limit,
-            "total_pages": (total + limit - 1) // limit if total else 1
+            "total_pages": ((total or 0) + limit - 1) // limit if total else 1
         }
 
-async def get_term_postings(term: str, page: int = 1, limit: int = 50):
+async def get_term_postings(term: str, page: int = 1, limit: int = 20):
     if not db_pool: return None
     offset = (page - 1) * limit
     async with db_pool.acquire() as conn:
